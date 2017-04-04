@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "## FROM GAVIN\n## https://gavinband.wordpress.com/2015/04/27/computing-ld-in-r/\n\ncompute.ld <- function( haps, focus.i = 1:nrow(haps), variant.names = rownames( haps ) ) {\n  # haps is a 0-1 matrix with L SNPs (in rows) and N haplotypes (in columns).\n  # Since the values are 0, 1, we rely on the fact that a*b=1 iff a and b are 1.\n  # assume focus.i contains l values in range 1..L\n  L = nrow( haps )\n  l = length( focus.i )\n  # p11 = lxL matrix.  i,jth entry is probability of 11 haplotype for ith focal SNP against jth SNP.\n  focus.hap = haps[ focus.i, , drop = FALSE ]\n  p11 <- ( focus.hap %*% t( haps )) / ncol( haps )\n  # p1. = lxL matrix.  ith row is filled with the frequency of ith focal SNP.\n  p1. <- matrix( rep( rowSums( focus.hap ) / ncol( haps ), L ), length( focus.i ), L, byrow = FALSE )\n  # p.1 = lxL matrix.  jth column is filled with the frequency of jth SNP.\n  frequency = rowSums( haps ) / ncol( haps )\n  p.1 <- matrix( rep( frequency, length( focus.i ) ), length( focus.i ), L, byrow = TRUE )\n  \n  # Compute D\n  D <- p11 - p1. * p.1\n  \n  # Compute D'\n  denominator = pmin( p1.*(1-p.1), (1-p1.)*p.1 )\n  wNeg = (D < 0)\n  denominator[ wNeg ] = pmin( p1.*p.1, (1-p1.)*(1-p.1) )[wNeg]\n  denominator[ denominator == 0 ] = NA\n  Dprime = D / denominator \n  \n  # Compute correlation, this result should agree with cor( t(haps ))\n  R = D / sqrt( p1. * ( 1 - p1. ) * p.1 * ( 1 - p.1 ))\n  R[ frequency[ focus.i ] == 0 | frequency[ focus.i ] == 1, frequency == 0 | frequency == 1 ] = NA\n  if( !is.null( variant.names )) {\n    rownames( D ) = rownames( Dprime ) = rownames( R ) = variant.names[ focus.i ]\n    colnames( D ) = colnames( Dprime ) = colnames( R ) = variant.names\n    names( frequency ) = variant.names\n  }\n  \n  return( list( D = D, Dprime = Dprime, frequency = frequency, R = R ) ) ;\n}",
+    "created" : 1491228947903.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1669089900",
+    "id" : "932AF37A",
+    "lastKnownWriteTime" : 1491228987,
+    "last_content_update" : 1491228987742,
+    "path" : "~/repos/carolyne_thal/functions/compute.ld.R",
+    "project_path" : "functions/compute.ld.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
